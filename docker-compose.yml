@@ -1,0 +1,8 @@
+services:
+  jwt-lab:
+    build: .
+    container_name: jwt-lab
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: development
