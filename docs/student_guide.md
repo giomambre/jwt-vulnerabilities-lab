@@ -17,16 +17,17 @@ You must complete four tasks:
 | 1 | `alg:none` | Complete a script that creates an unsigned admin token |
 | 2 | RS256 to HS256 confusion | Complete a script that signs an admin token with HS256 using the RSA public key as the HMAC secret |
 | 3 | `kid` path traversal | Complete a script that points `kid` to an attacker-controlled key file |
-| 4 | Hardening | Edit the server code so the previous forged tokens are rejected |
+| 4 | `jwk` header injection | Complete a script that embeds an attacker-controlled public key in the JWT header |
+| 5 | Hardening | Edit the server code so all four forged tokens are rejected |
 
 ## What You Must Submit
 
 Submit a short report containing:
 
-- The completed code snippets for the TODOs in Tasks 1, 2, and 3.
-- Terminal output showing successful admin access for Tasks 1, 2, and 3.
+- The completed code snippets for the TODOs in Tasks 1, 2, 3, and 4.
+- Terminal output showing successful admin access for Tasks 1, 2, 3, and 4.
 - Your completed `student_secure_decode_rs256()` function from `app/security.py`.
-- Terminal output showing that the attacks fail after your fix.
+- Terminal output showing that all four attacks fail after your fix.
 - Short answers to the questions at the end of each task.
 
 ## 1. Setup
@@ -238,7 +239,68 @@ The final request should contain:
 - Why is direct filesystem path construction dangerous here?
 - How should the server map a `kid` value to a key?
 
-## 5. Task 4: Hardening the Server
+## 5. Task 4: `jwk` Header Injection
+
+### Objective
+
+Exploit a server that trusts the public key embedded in the JWT header.
+
+The server validates RS256 tokens by reading the `jwk` field from the token header and using whatever public key it finds there. An attacker can generate their own RSA key pair, embed the public key in the JWT header, sign the token with the corresponding private key, and the server will verify it successfully — because it is using the attacker's own key.
+
+### Code You Must Complete
+
+Open:
+
+```text
+exploits/task4_jwk_injection.py
+```
+
+Complete the TODOs. You must:
+
+- generate an RSA key pair you control;
+- convert the public key to JWK format and embed it in the header;
+- sign the forged token with your private key.
+
+This exploit requires PyJWT and the cryptography library on your host machine:
+
+```bash
+pip install pyjwt cryptography
+```
+
+### Commands
+
+Get a normal RS256 token:
+
+```bash
+TOKEN=$(curl -s -X POST http://localhost:5000/task4/login \
+  -H "Content-Type: application/json" \
+  -d '{"username":"alice","password":"password123"}' | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
+```
+
+After completing the TODOs, forge an injected token:
+
+```bash
+FORGED=$(python3 exploits/task4_jwk_injection.py "$TOKEN")
+curl -i http://localhost:5000/task4/admin -H "Authorization: Bearer $FORGED"
+```
+
+### Success Condition
+
+The final request should contain:
+
+```json
+"message": "Task 4 admin access granted"
+```
+
+### Questions
+
+- What does the `jwk` JWT header parameter contain?
+- Why is trusting a key embedded in the token fundamentally broken, even if the signature is valid?
+- What is the correct way for a server to obtain the verification key?
+
+---
+
+## 6. Task 5: Hardening the Server
 
 ### Objective
 
@@ -297,22 +359,23 @@ Expected result:
 "message": "Secure admin access granted"
 ```
 
-Then send the forged tokens from Tasks 1, 2, and 3 to:
+Then send the forged tokens from Tasks 1, 2, 3, and 4 to:
 
 ```text
 GET /fixed/admin
 ```
 
-They must be rejected.
+They must all be rejected.
 
 ### Questions
 
 - Which check blocks the `alg:none` attack?
 - Which check blocks the RS256 to HS256 confusion attack?
 - Which check blocks the `kid` path traversal attack?
+- Which check also blocks the `jwk` header injection attack?
 - Why is issuer and audience validation useful?
 
-## 6. Final Checklist
+## 7. Final Checklist
 
 Before submitting, make sure your report includes:
 
@@ -320,7 +383,8 @@ Before submitting, make sure your report includes:
 - successful Task 1 attack output;
 - successful Task 2 attack output;
 - successful Task 3 attack output;
+- successful Task 4 attack output;
 - completed secure validation function;
 - output showing legitimate `/fixed/admin` access works;
-- output showing forged tokens fail against `/fixed/admin`;
+- output showing all four forged tokens fail against `/fixed/admin`;
 - answers to all task questions.

@@ -5,6 +5,7 @@ import json
 from typing import Any
 
 import jwt
+from jwt.algorithms import RSAAlgorithm
 
 from app.key_material import KEY_DIR, read_task2_public_key
 
@@ -99,6 +100,27 @@ def vulnerable_task3_decode(token: str) -> dict[str, Any]:
         raise AuthError(f"could not read key: {key_path}") from exc
     except jwt.PyJWTError as exc:
         raise AuthError(str(exc)) from exc
+
+
+def vulnerable_task4_decode(token: str) -> dict[str, Any]:
+    header = _get_unverified_header(token)
+
+    if header.get("alg") != "RS256":
+        raise AuthError("task 4 expects RS256")
+
+    jwk_data = header.get("jwk")
+    if not jwk_data:
+        raise AuthError("missing jwk header parameter")
+
+    try:
+        public_key = RSAAlgorithm.from_jwk(
+            json.dumps(jwk_data) if isinstance(jwk_data, dict) else jwk_data
+        )
+        return jwt.decode(token, public_key, algorithms=["RS256"])
+    except jwt.PyJWTError as exc:
+        raise AuthError(str(exc)) from exc
+    except Exception as exc:
+        raise AuthError(f"invalid jwk: {exc}") from exc
 
 
 def student_secure_decode_rs256(token: str) -> dict[str, Any]:

@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JWT Vulnerabilities Lab</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="container">
+    <h1>JWT Vulnerabilities Lab</h1>
+    <p>Hands-on exploitation and hardening of common JWT implementation flaws</p>
+  </div>
+</header>
+
+<nav class="task-nav">
+  <a href="#task1" class="nav-link vuln">Task 1 — alg:none</a>
+  <a href="#task2" class="nav-link vuln">Task 2 — Alg Confusion</a>
+  <a href="#task3" class="nav-link vuln">Task 3 — kid Traversal</a>
+  <a href="#task4" class="nav-link vuln">Task 4 — jwk Injection</a>
+  <a href="#fixed" class="nav-link safe">Task 5 — Hardening</a>
+</nav>
+
+<main class="container lab-main">
+
+  <!-- ── TASK 1 ──────────────────────────────────────────────── -->
+  <section id="task1" class="task-section">
+    <div class="task-header">
+      <span class="badge badge-vuln">VULNERABLE</span>
+      <h2>Task 1 — <code>alg:none</code> Attack</h2>
+      <p class="task-desc">
+        The server reads <code>alg</code> from the <em>unverified</em> JWT header.
+        Setting it to <code>"none"</code> bypasses signature verification entirely —
+        any unsigned token with any claims is accepted.
+      </p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-label">Step 1</div>
+        <h3>Get alice's token from <code>/task1/login</code></h3>
+        <button class="btn" onclick="loginTask(1)">Login as alice</button>
+        <div id="task1-token" class="token-card hidden"></div>
+      </div>
+      <div class="step">
+        <div class="step-label">Step 2</div>
+        <h3>Forge an admin token — set <code>alg:none</code>, <code>role:admin</code></h3>
+        <button class="btn btn-attack" onclick="forgeTask(1)">Forge Token</button>
+        <div id="task1-forged" class="token-card hidden"></div>
+      </div>
+      <div class="step">
+        <div class="step-label">Step 3</div>
+        <h3>Attack <code>/task1/admin</code> with the forged token</h3>
+        <button class="btn btn-attack" onclick="attackTask(1)">Send Forged Token</button>
+        <div id="task1-result" class="result-card hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TASK 2 ──────────────────────────────────────────────── -->
+  <section id="task2" class="task-section">
+    <div class="task-header">
+      <span class="badge badge-vuln">VULNERABLE</span>
+      <h2>Task 2 — RS256 → HS256 Algorithm Confusion</h2>
+      <p class="task-desc">
+        The server is supposed to use RS256 but also accepts HS256.
+        The RSA public key is publicly exposed at <code>/task2/public.pem</code>.
+        An attacker re-signs a tampered token using the <em>public key as the HMAC-SHA256 secret</em> —
+        the server verifies it successfully.
+      </p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-label">Step 1</div>
+        <h3>Get alice's RS256 token from <code>/task2/login</code></h3>
+        <button class="btn" onclick="loginTask(2)">Login as alice</button>
+        <div id="task2-token" class="token-card hidden"></div>
+      </div>
+      <div class="step">
+        <div class="step-label">Step 2</div>
+        <h3>Forge an HS256 admin token — signed with the RSA public key</h3>
+        <button class="btn btn-attack" onclick="forgeTask(2)">Forge Token</button>
+        <div id="task2-forged" class="token-card hidden"></div>
+      </div>
+      <div class="step">
+        <div class="step-label">Step 3</div>
+        <h3>Attack <code>/task2/admin</code> with the forged token</h3>
+        <button class="btn btn-attack" onclick="attackTask(2)">Send Forged Token</button>
+        <div id="task2-result" class="result-card hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TASK 3 ──────────────────────────────────────────────── -->
+  <section id="task3" class="task-section">
+    <div class="task-header">
+      <span class="badge badge-vuln">VULNERABLE</span>
+      <h2>Task 3 — <code>kid</code> Header Path Traversal</h2>
+      <p class="task-desc">
+        The server builds a filesystem path from the JWT <code>kid</code> header without sanitization.
+        Setting <code>kid</code> to <code>../../../tmp/jwt-lab/attacker.key</code>
+        redirects key lookup to an attacker-controlled file.
+      </p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-label">Step 1</div>
+        <h3>Get alice's token from <code>/task3/login</code></h3>
+        <button class="btn" onclick="loginTask(3)">Login as alice</button>
+        <div id="task3-token" class="token-card hidden"></div>
+      </div>
+      <div class="step">
+        <div class="step-label">Step 2</div>
+        <h3>Plant attacker key, forge token with traversal <code>kid</code></h3>
+        <p class="step-note">Also writes <code>student-controlled-secret</code> to <code>/tmp/jwt-lab/attacker.key</code> inside the container.</p>
+        <button class="btn btn-attack" onclick="forgeTask(3)">Forge Token</button>
+        <div id="task3-forged" class="token-card hidden"></div>
+      </div>
+      <div class="step">
+        <div class="step-label">Step 3</div>
+        <h3>Attack <code>/task3/admin</code> with the forged token</h3>
+        <button class="btn btn-attack" onclick="attackTask(3)">Send Forged Token</button>
+        <div id="task3-result" class="result-card hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TASK 4 ──────────────────────────────────────────────── -->
+  <section id="task4" class="task-section">
+    <div class="task-header">
+      <span class="badge badge-vuln">VULNERABLE</span>
+      <h2>Task 4 — <code>jwk</code> Header Injection</h2>
+      <p class="task-desc">
+        The server reads the <code>jwk</code> field from the JWT header and uses
+        whatever public key it finds there. An attacker generates their own RSA key pair,
+        embeds the public key in the header, signs with the private key, and the server
+        verifies it — using the attacker's own key.
+      </p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-label">Step 1</div>
+        <h3>Get alice's RS256 token from <code>/task4/login</code></h3>
+        <button class="btn" onclick="loginTask(4)">Login as alice</button>
+        <div id="task4-token" class="token-card hidden"></div>
+      </div>
+      <div class="step">
+        <div class="step-label">Step 2</div>
+        <h3>Forge a token — embed attacker-controlled public key in <code>jwk</code> header</h3>
+        <button class="btn btn-attack" onclick="forgeTask(4)">Forge Token</button>
+        <div id="task4-forged" class="token-card hidden"></div>
+      </div>
+      <div class="step">
+        <div class="step-label">Step 3</div>
+        <h3>Attack <code>/task4/admin</code> with the forged token</h3>
+        <button class="btn btn-attack" onclick="attackTask(4)">Send Forged Token</button>
+        <div id="task4-result" class="result-card hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── TASK 5 / FIXED ─────────────────────────────────────── -->
+  <section id="fixed" class="task-section task-section-safe">
+    <div class="task-header task-header-safe">
+      <span class="badge badge-safe">TASK 5 — HARDENING</span>
+      <h2>Hardened Endpoint — <code>/fixed/admin</code></h2>
+      <p class="task-desc">
+        Edit <code>student_secure_decode_rs256()</code> in <code>app/security.py</code>.
+        Rebuild with <code>docker compose up --build</code>.
+        Legitimate admin tokens must pass; all four forged tokens must be rejected.
+      </p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-label">Verify — Legit access</div>
+        <h3>A real admin token should reach <code>/fixed/admin</code></h3>
+        <div class="btn-row">
+          <button class="btn btn-safe" onclick="loginFixed()">Login as admin</button>
+          <button class="btn btn-safe hidden" id="fixed-test-btn" onclick="attackFixed()">Test /fixed/admin</button>
+        </div>
+        <div id="fixed-token" class="token-card hidden"></div>
+        <div id="fixed-result" class="result-card hidden"></div>
+      </div>
+      <div class="step">
+        <div class="step-label">Verify — Attack resistance</div>
+        <h3>All forged tokens from Tasks 1–3 should be rejected</h3>
+        <p class="step-note">Complete the three tasks above first to generate forged tokens.</p>
+        <div class="attack-tests">
+          <div class="attack-test-row">
+            <span>Task 1 — <code>alg:none</code> forged token</span>
+            <button class="btn btn-sm" onclick="testForgedOnFixed(1)">Test</button>
+            <span id="fixed-test1" class="result-pill hidden"></span>
+          </div>
+          <div class="attack-test-row">
+            <span>Task 2 — alg confusion forged token</span>
+            <button class="btn btn-sm" onclick="testForgedOnFixed(2)">Test</button>
+            <span id="fixed-test2" class="result-pill hidden"></span>
+          </div>
+          <div class="attack-test-row">
+            <span>Task 3 — <code>kid</code> traversal forged token</span>
+            <button class="btn btn-sm" onclick="testForgedOnFixed(3)">Test</button>
+            <span id="fixed-test3" class="result-pill hidden"></span>
+          </div>
+          <div class="attack-test-row">
+            <span>Task 4 — <code>jwk</code> injection forged token</span>
+            <button class="btn btn-sm" onclick="testForgedOnFixed(4)">Test</button>
+            <span id="fixed-test4" class="result-pill hidden"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

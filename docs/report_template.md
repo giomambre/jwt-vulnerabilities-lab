@@ -61,7 +61,25 @@ Answer:
 - Why is direct filesystem path construction dangerous here?
 - How should the server map a `kid` value to a key?
 
-## Task 4: Hardening
+## Task 4: `jwk` Header Injection
+
+### Completed Code
+
+Paste the relevant completed lines from `exploits/task4_jwk_injection.py`.
+
+### Evidence
+
+Paste terminal output showing admin access.
+
+### Explanation
+
+Answer:
+
+- What does the `jwk` JWT header parameter contain?
+- Why is trusting a key embedded in the token fundamentally broken, even if the signature is valid?
+- What is the correct way for a server to obtain the verification key?
+
+## Task 5: Hardening
 
 ### Completed Server Code
 
@@ -74,7 +92,8 @@ Paste terminal output showing:
 - legitimate admin token accepted by `/fixed/admin`;
 - forged Task 1 token rejected by `/fixed/admin`;
 - forged Task 2 token rejected by `/fixed/admin`;
-- forged Task 3 token rejected by `/fixed/admin`.
+- forged Task 3 token rejected by `/fixed/admin`;
+- forged Task 4 token rejected by `/fixed/admin`.
 
 ### Explanation
 
@@ -83,4 +102,5 @@ Answer:
 - Which check blocks the `alg:none` attack?
 - Which check blocks the RS256 to HS256 confusion attack?
 - Which check blocks the `kid` path traversal attack?
+- Which check also blocks the `jwk` header injection attack?
 - Why is issuer and audience validation useful?
