@@ -11,6 +11,15 @@ Students complete starter exploit scripts, collect evidence of successful attack
 
 ## Run
 
+**Debian / Ubuntu** — install Docker if not already present:
+
+```bash
+sudo apt update && sudo apt install -y docker.io docker-compose-v2
+sudo usermod -aG docker $USER   # log out and back in afterwards
+```
+
+**All platforms:**
+
 ```bash
 docker compose up --build
 ```

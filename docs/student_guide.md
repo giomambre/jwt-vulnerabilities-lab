@@ -32,6 +32,13 @@ Submit a short report containing:
 
 ## 1. Setup
 
+If Docker is not yet installed (Debian / Ubuntu):
+
+```bash
+sudo apt update && sudo apt install -y docker.io docker-compose-v2
+sudo usermod -aG docker $USER   # log out and back in afterwards
+```
+
 Start the lab:
 
 ```bash
@@ -49,6 +56,7 @@ Expected output:
 ```json
 {"ok":true}
 ```
+
 
 The low-privilege account is:
 

