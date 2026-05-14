@@ -11,14 +11,12 @@ Students complete starter exploit scripts, collect evidence of successful attack
 5. Secure JWT validation and hardening
 
 ## Prerequisites
-*[Installation instructions all in [docs/student_guide.md](docs/student_guide.md)]*
 
-- **Docker** — to run the lab server
-- **Python 3.9+** — to run the exploit scripts on the host
-- **PyJWT and cryptography** — for the Task 4 exploit script only
+Installation instructions are in [docs/student_guide.md](docs/student_guide.md).
 
-
-
+- **Docker** - to run the lab server
+- **Python 3.9+** - to run the exploit scripts on the host
+- **PyJWT and cryptography** - for the Task 4 exploit script only
 
 ## Deliverables
 
@@ -31,11 +29,10 @@ Students complete starter exploit scripts, collect evidence of successful attack
 - [docs/solutions_for_instructor.md](docs/solutions_for_instructor.md): reference solutions, not intended for students during assessment
 - `app/`: vulnerable Flask application
 - `exploits/`: helper scripts for the attacks
+- `developers.txt`: group member names required by the course submission
 
-Before final submission, zip this folder as required by the course instructions.
+Before final submission, fill in `developers.txt` and zip this folder as required by the course instructions.
 
 ## Group Members
 
-- <!-- Name 1 -->
-- João Belchior
-- <!-- Name 3 -->
+See `developers.txt`.

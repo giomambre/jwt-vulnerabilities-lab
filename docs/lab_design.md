@@ -36,13 +36,13 @@ Students are expected to:
 
 ## Relationship to Existing Labs
 
-PortSwigger Web Security Academy covers the same three JWT attacks. This lab is a significant alternative on the following grounds:
+PortSwigger Web Security Academy covers several JWT attacks. This lab is a significant alternative on the following grounds:
 
-- **White-box** — students read the vulnerable server code directly (`app/security.py`), so they understand *why* each validation is broken, not just *that* it is.
-- **Hardening task** — Task 4 requires students to implement the fix. PortSwigger stops at exploitation.
-- **Code-completion model** — exploit scripts contain TODOs that students must complete, rather than running pre-built tools.
-- **Self-contained and open** — runs entirely offline via Docker with no external account or dependency; the full source is available for inspection and modification.
-- **Complete educational package** — ships as a SEED-style bundle: theory, guided lab, hints, report template, grading rubric, and instructor solutions.
+- **White-box** - students read the vulnerable server code directly (`app/security.py`), so they understand why each validation is broken, not just that it is.
+- **Hardening task** - Task 5 requires students to implement the fix. PortSwigger stops at exploitation.
+- **Code-completion model** - exploit scripts contain TODOs that students must complete, rather than running pre-built tools.
+- **Self-contained and open** - runs entirely offline via Docker with no external account or dependency; the full source is available for inspection and modification.
+- **Complete educational package** - ships as a SEED-style bundle: theory, guided lab, hints, report template, grading rubric, and instructor solutions.
 
 ## Files
 

@@ -4,7 +4,7 @@
 
 In this lab you are given a vulnerable web application that uses JSON Web Tokens for authentication.
 
-Your goal is to understand how JWT validation mistakes lead to authentication bypasses. You will exploit three vulnerabilities, then modify the server code to prevent them.
+Your goal is to understand how JWT validation mistakes lead to authentication bypasses. You will exploit four vulnerabilities, then modify the server code to prevent them.
 
 This is not only a command-running exercise. You must complete small pieces of exploit code and then implement a secure validation function.
 
@@ -93,7 +93,7 @@ The low-privilege account is:
 alice / password123
 ```
 
-The admin account, used only for Task 4 verification, is:
+The admin account, used only for Task 5 verification, is:
 
 ```text
 admin / admin123
