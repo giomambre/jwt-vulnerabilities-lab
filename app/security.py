@@ -124,7 +124,7 @@ def vulnerable_task4_decode(token: str) -> dict[str, Any]:
 
 
 def student_secure_decode_rs256(token: str) -> dict[str, Any]:
-    """Task 4: students must replace this TODO with secure JWT validation."""
+    """Task 5: students must replace this TODO with secure JWT validation."""
     header = _get_unverified_header(token)
 
     # TODO 1: reject every token whose algorithm is not exactly RS256.
@@ -134,4 +134,4 @@ def student_secure_decode_rs256(token: str) -> dict[str, Any]:
     # TODO 5: raise AuthError with a useful message when validation fails.
     #
     # Hint: use jwt.decode(..., algorithms=["RS256"], issuer=ISSUER, audience=AUDIENCE).
-    raise AuthError("Task 4 TODO: implement secure JWT validation")
+    raise AuthError("Task 5 TODO: implement secure JWT validation")
