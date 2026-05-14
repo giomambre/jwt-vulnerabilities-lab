@@ -31,8 +31,8 @@ Installation instructions are in [docs/student_guide.md](docs/student_guide.md).
 - `exploits/`: helper scripts for the attacks
 - `developers.txt`: group member names required by the course submission
 
-Before final submission, fill in `developers.txt` and zip this folder as required by the course instructions.
-
 ## Group Members
-
-See `developers.txt`.
+Group #6
+Giovanni Mambretti
+Joao Belchior
+Santiago Nogueira
